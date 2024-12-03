@@ -17,35 +17,76 @@ Visit <https://cosma.arthurperret.fr> to learn more about the software.
 - [Getting started](https://cosma.arthurperret.fr/getting-started.html)
 - [User manual](https://cosma.arthurperret.fr/user-manual.html)
 
-## Install
+## Commands
+
+### Install
+
+Need NodeJs v.18 or later.
+
+You want to install app to your computer:
 
 ```bash
-npm i # install dependences + build JS files
+npm i @graphlab-fr/cosma --global
+cosma --help # enjoy
 ```
 
-## Development
+You want to install app to your own project ([see exemple](https://github.com/Myllaume/cosmoscope-generator)):
+
+```bash
+npm i @graphlab-fr/cosma
+npx cosma --help
+# or
+./node_modules/.bin/cosma cosma --help
+```
+
+You have dowloaded this repository and want to execute app:
+
+```bash
+npm i # install dependences + build executable file
+node dist/back.cjs # execute app
+```
+
+### Development
+
+You want build executable each time you edit files:
 
 ```bash
 npm run watch:front # build web browser script
 npm run watch:back # build NodeJs executable file
-nodemon --ext css,njk,js,cjs --watch dist/ --watch static/ --exec "sh e2e/exec-modelize.sh" # make cosmoscope files for dev or E2E testing
+
+# install nodemon and export files when executable change
+nodemon --ext css,njk,js,cjs --watch dist/ --watch static/ --exec "sh e2e/exec-modelize.sh"
 ```
 
-## Testing
+You want build production ready app and export files with
 
-**Unit testing**: make some asserts on core functions.
+```bash
+npm prepare
+sh e2e/exec-modelize.sh
+```
+
+### Testing
+
+**Unit testing**: make some asserts on business functions and models.
 Using [Jest](https://jestjs.io/).
 
 ```bash
+npm run test:unit
 npm run test:unit -- --verbose --watchAll
-npm run test:unit -- filename --verbose --watchAll
-npm run test:unit -- --runTestsByPath filepath --verbose --watchAll
+npm run test:unit -- --runTestsByPath <filepath> --verbose --watchAll
 ```
 
 **E2E testing**: generate Cosma's HTML and Markdown files and make some asserts on.
 Using [Cypress](https://www.cypress.io/).
 
 ```bash
+npm prepare
 sh e2e/exec-modelize.sh
 npm run test:e2e -- --spec "**/graph.cy.js"
 ```
+
+## Concepts
+
+Cosma read files (.md, .csv and .json) to extract _Records_. Each _Record_ contains metadatas (id, title, types, tags…) and links to other _Records_. Links are parsed from files content, as wikilinks or quotes. Each _Record_ became a node and links became edges on a graph. This process is made by the software named _Cosmographe_. Cosma finally exports .html file, which is visualization tool for the graph. This file is called _Cosmoscope_.
+
+User give .yml config file contains options to control _Records_ extraction and _Cosmoscope_ display.
