@@ -10,6 +10,7 @@ import Config from './config.js';
 import Bibliography from './bibliography.js';
 import nunjucks from 'nunjucks';
 import mdIt from 'markdown-it';
+import mk from '@vscode/markdown-it-katex';
 import app from '../../package.json';
 import { isAnImagePath } from '../utils/misc.js';
 import slugify from '../utils/slugify.js';
@@ -39,6 +40,7 @@ const md = new mdIt({
   linkify: true,
   breaks: true,
 });
+md.use(mk);
 
 /**
  * Class to get the Cosmoscope source code
