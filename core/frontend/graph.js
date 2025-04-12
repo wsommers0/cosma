@@ -81,12 +81,16 @@ hotkeys('space', (e) => {
   updateForces();
 });
 
+function dist(x1, y1, x2, y2) {
+	return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
 simulation.on('tick', function () {
   elts.links
-    .attr('x1', (d) => d.source.x)
-    .attr('y1', (d) => d.source.y)
-    .attr('x2', (d) => d.target.x)
-    .attr('y2', (d) => d.target.y);
+    .attr('x1', (d) => d.source.x + (d.source.attributes.size + 2) * (d.target.x - d.source.x) / dist(d.source.x, d.source.y, d.target.x, d.target.y))
+    .attr('y1', (d) => d.source.y + (d.source.attributes.size + 2) * (d.target.y - d.source.y) / dist(d.source.x, d.source.y, d.target.x, d.target.y))
+    .attr('x2', (d) => d.target.x - (d.target.attributes.size + 2 + (graphProperties.graph_arrows === true ? 5 : 0)) * (d.target.x - d.source.x) / dist(d.source.x, d.source.y, d.target.x, d.target.y))
+    .attr('y2', (d) => d.target.y - (d.target.attributes.size + 2 + (graphProperties.graph_arrows === true ? 5 : 0)) * (d.target.y - d.source.y) / dist(d.source.x, d.source.y, d.target.x, d.target.y));
   
   elts.linkLabels
     .attr("x", (d) => (d.source.x + d.target.x) / 2)
