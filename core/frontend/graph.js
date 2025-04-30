@@ -45,8 +45,10 @@ const simulation = d3
   .forceSimulation(data.nodes)
   .force(
     'link',
-    d3.forceLink(data.edges).id((d) => d.key),
+    d3.forceLink(data.edges).id((d) => d.key)
+    .distance(d => d.attributes.force !== undefined ? d.attributes.force : 30),
   )
+  // .strength(d => d.attributes.strength !== undefined ? d.attributes.strength : 1) // Optionally add strength based on type too
   .force('charge', d3.forceManyBody())
   .force('center', d3.forceCenter())
   .force('forceX', d3.forceX())

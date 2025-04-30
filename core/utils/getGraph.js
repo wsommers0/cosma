@@ -113,9 +113,13 @@ export default function getGraph(records, config) {
         return;
       }
 
+      const linkTypeConfig = config.opts.link_types[link.type];
+      console.log("Link Type Config:", linkTypeConfig)
+
       graph.addDirectedEdge(record.id, link.target, {
         type: slugify(link.type),
         shape: getLinkShape(link.type, config),
+        force: linkTypeConfig?.force, // Add the force attribute to the edge
       });
     });
   });
