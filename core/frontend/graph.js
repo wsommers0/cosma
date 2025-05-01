@@ -567,7 +567,7 @@ window.labelDisplayToggle = function (isChecked) {
   }
 };
 
-let linkLabelsDisplayToggle = true; // Keep track of global label toggle state
+let linkLabelsDisplayToggle = false; // Keep track of global label toggle state
 window.linkLabelDisplayToggle = function (isChecked) {
   linkLabelsDisplayToggle = isChecked;
   updateLinkVisibilityBasedOnFiltersAndNodes(); // Update visibility when toggled
