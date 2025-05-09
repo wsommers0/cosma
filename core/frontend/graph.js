@@ -36,7 +36,8 @@ const svgSub = svg.append('svg');
 
 const { width, height } = svg.node().getBoundingClientRect();
 
-svgSub.attr('viewBox', [0, 0, width, height]);
+svgSub.attr('viewBox', `0 0 ${width} ${height}`)
+  .attr('preserveAspectRatio', 'xMinYMin meet'); // Set preserveAspectRatio once
 
 /** Force simulation
 ------------------------------------------------------------*/
@@ -46,7 +47,7 @@ const simulation = d3
   .force(
     'link',
     d3.forceLink(data.edges).id((d) => d.key)
-    .distance(d => d.attributes.force !== undefined ? d.attributes.force : 30),
+      .distance(d => d.attributes.force !== undefined ? d.attributes.force : 30),
   )
   // .strength(d => d.attributes.strength !== undefined ? d.attributes.strength : 1) // Optionally add strength based on type too
   .force('charge', d3.forceManyBody())
@@ -84,7 +85,7 @@ hotkeys('space', (e) => {
 });
 
 function dist(x1, y1, x2, y2) {
-	return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
 simulation.on('tick', function () {
@@ -93,7 +94,7 @@ simulation.on('tick', function () {
     .attr('y1', (d) => d.source.y + (d.source.attributes.size + 2) * (d.target.y - d.source.y) / dist(d.source.x, d.source.y, d.target.x, d.target.y))
     .attr('x2', (d) => d.target.x - (d.target.attributes.size + 2 + (graphProperties.graph_arrows === true ? 5 : 0)) * (d.target.x - d.source.x) / dist(d.source.x, d.source.y, d.target.x, d.target.y))
     .attr('y2', (d) => d.target.y - (d.target.attributes.size + 2 + (graphProperties.graph_arrows === true ? 5 : 0)) * (d.target.y - d.source.y) / dist(d.source.x, d.source.y, d.target.x, d.target.y));
-  
+
   elts.linkLabels
     .attr("x", (d) => (d.source.x + d.target.x) / 2)
     .attr("y", (d) => (d.source.y + d.target.y) / 2)
@@ -105,7 +106,7 @@ simulation.on('tick', function () {
       if (angle > 90 || angle < -90) {
         angle = (angle + 180) % 360;
       }
-      
+
       var x = (d.source.x + d.target.x) / 2;
       var y = (d.source.y + d.target.y) / 2;
       return `rotate(${angle},${x},${y})`;
@@ -380,9 +381,8 @@ function generatePathCoordinatesWithBorder(numSegments, diameter, borderSize) {
     const borderEndX = centerX + (diameter + borderSize) * Math.cos(endAngle);
     const borderEndY = centerY + (diameter + borderSize) * Math.sin(endAngle);
 
-    const borderPathData = `M ${borderStartX} ${borderStartY} A ${diameter + borderSize} ${
-      diameter + borderSize
-    } 0 0 1 ${borderEndX} ${borderEndY} L ${centerX} ${centerY} Z`;
+    const borderPathData = `M ${borderStartX} ${borderStartY} A ${diameter + borderSize} ${diameter + borderSize
+      } 0 0 1 ${borderEndX} ${borderEndY} L ${centerX} ${centerY} Z`;
 
     coordinatesData.push({
       segment: pathData,
@@ -470,8 +470,8 @@ let activeLinkTypes = new Set(Object.keys(linkTypeList)); // Initially all activ
 
 // Function called by filter.js when link checkboxes change
 function updateLinkVisibility(newActiveLinkTypes) {
-    activeLinkTypes = newActiveLinkTypes;
-    updateLinkVisibilityBasedOnFiltersAndNodes();
+  activeLinkTypes = newActiveLinkTypes;
+  updateLinkVisibilityBasedOnFiltersAndNodes();
 }
 
 // Central function to update link visibility based on *both* filters and node visibility
@@ -501,7 +501,7 @@ function updateLinkVisibilityBasedOnFiltersAndNodes() {
       return typeIsActive && sourceIsVisible && targetIsVisible ? null : 'none';
     });
   }
-    // Note: No need to update counters for links usually, unless you add a link counter UI element.
+  // Note: No need to update counters for links usually, unless you add a link counter UI element.
 }
 
 let highlightedNodes = [];
@@ -582,35 +582,20 @@ window.updateFontsize = function () {
 };
 
 function translate() {
-  const minX = d3.min(data.nodes, (d) => d.x);
-  const maxX = d3.max(data.nodes, (d) => d.x);
-  const minY = d3.min(data.nodes, (d) => d.y);
-  const maxY = d3.max(data.nodes, (d) => d.y);
+  const { x, y, zoom: k } = position;
 
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
+  // Use the 'width' and 'height' from the main svg's getBoundingClientRect,
+  // which were captured when the svg was initialized.
+  // These represent the base dimensions of your view.
+  const currentViewBoxWidth = width / k;
+  const currentViewBoxHeight = height / k;
 
-  const { x, y, zoom } = position;
+  // The viewBox origin is determined by the D3 zoom transform's x and y,
+  // scaled by the zoom factor k.
+  const viewBoxX = -x / k;
+  const viewBoxY = -y / k;
 
-  const screenMin = d3.min([screenHeight, screenWidth]);
-
-  let viewBoxWidth = maxX - minX;
-  if (viewBoxWidth < screenMin) viewBoxWidth = screenMin;
-  let viewBoxHeight = maxY - minY;
-  if (viewBoxHeight < screenMin) viewBoxHeight = screenMin;
-
-  if (0 > minX || 0 > minY) {
-    const viewBox = [
-      (minX - x) / zoom,
-      (minY - y) / zoom,
-      viewBoxWidth / zoom,
-      viewBoxHeight / zoom,
-    ];
-    svgSub.attr('viewBox', viewBox).attr('preserveAspectRatio', null);
-  } else {
-    const viewBox = [(0 - x) / zoom, (0 - y) / zoom, viewBoxWidth / zoom, viewBoxHeight / zoom];
-    svgSub.attr('viewBox', viewBox).attr('preserveAspectRatio', 'xMinYMin meet');
-  }
+  svgSub.attr('viewBox', `${viewBoxX} ${viewBoxY} ${currentViewBoxWidth} ${currentViewBoxHeight}`);
 }
 
 const zoomMax = 10,
